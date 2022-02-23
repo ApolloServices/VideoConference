@@ -79,27 +79,11 @@ namespace RTC
 		// the deque.
 		auto addToBack{ static_cast<uint16_t>(seq - (this->startSeq + this->buffer.size() - 1)) };
 		// Calculate how many elements would it be necessary to add when pushing new item to the front
-		// of the deque.
-		auto addToFront{ static_cast<uint16_t>(this->startSeq - seq) };
+		// Packets can arrive out of order, add blank slots.
+		for (uint16_t i{ 1 }; i < addToBack; ++i)
+			this->buffer.push_back(nullptr);
 
-		// Select the side of deque where fewer elements need to be added, while preferring the end.
-		if (addToBack <= addToFront)
-		{
-			// Packets can arrive out of order, add blank slots.
-			for (uint16_t i{ 1 }; i < addToBack; ++i)
-				this->buffer.push_back(nullptr);
-
-			this->buffer.push_back(storageItem);
-		}
-		else
-		{
-			// Packets can arrive out of order, add blank slots.
-			for (uint16_t i{ 1 }; i < addToFront; ++i)
-				this->buffer.push_front(nullptr);
-
-			this->buffer.push_front(storageItem);
-			this->startSeq = seq;
-		}
+		this->buffer.push_back(storageItem);
 
 		return true;
 	}
