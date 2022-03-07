@@ -689,7 +689,7 @@ namespace RTC
 	}
 
 	inline void Router::OnTransportProducerRtpPacketReceived(
-	  RTC::Transport* /*transport*/, RTC::Producer* producer, RTC::RtpPacket* packet)
+	  RTC::Transport* /*transport*/, RTC::Producer* producer, RTC::RtpPacket::SharedPtr packet)
 	{
 		MS_TRACE();
 
@@ -697,11 +697,6 @@ namespace RTC
 
 		if (!consumers.empty())
 		{
-			// Cloned ref-counted packet that consumers will all store for as long as needed
-			// while also avoiding multiple allocations unless absolutely necessary.
-			// Clone only happens if needed though.
-			RtpPacket::SharedPtr clonedPacket{ nullptr };
-
 			for (auto* consumer : consumers)
 			{
 				// Update MID RTP extension value.
@@ -710,7 +705,7 @@ namespace RTC
 				if (!mid.empty())
 					packet->UpdateMid(mid);
 
-				consumer->SendRtpPacket(packet, clonedPacket);
+				consumer->SendRtpPacket(packet);
 			}
 		}
 
@@ -722,7 +717,7 @@ namespace RTC
 
 			for (auto* rtpObserver : rtpObservers)
 			{
-				rtpObserver->ReceiveRtpPacket(producer, packet);
+				rtpObserver->ReceiveRtpPacket(producer, packet.get());
 			}
 		}
 	}

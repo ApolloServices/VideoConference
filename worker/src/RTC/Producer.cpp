@@ -601,7 +601,7 @@ namespace RTC
 		}
 	}
 
-	Producer::ReceiveRtpPacketResult Producer::ReceiveRtpPacket(RTC::RtpPacket* packet)
+	Producer::ReceiveRtpPacketResult Producer::ReceiveRtpPacket(RTC::RtpPacket::SharedPtr packet)
 	{
 		MS_TRACE();
 
@@ -611,7 +611,7 @@ namespace RTC
 		// Count number of RTP streams.
 		auto numRtpStreamsBefore = this->mapSsrcRtpStream.size();
 
-		auto* rtpStream = GetRtpStream(packet);
+		auto* rtpStream = GetRtpStream(packet.get());
 
 		if (!rtpStream)
 		{
@@ -621,7 +621,7 @@ namespace RTC
 		}
 
 		// Pre-process the packet.
-		PreProcessRtpPacket(packet);
+		PreProcessRtpPacket(packet.get());
 
 		ReceiveRtpPacketResult result;
 		bool isRtx{ false };
@@ -632,7 +632,7 @@ namespace RTC
 			result = ReceiveRtpPacketResult::MEDIA;
 
 			// Process the packet.
-			if (!rtpStream->ReceivePacket(packet))
+			if (!rtpStream->ReceivePacket(packet.get()))
 			{
 				// May have to announce a new RTP stream to the listener.
 				if (this->mapSsrcRtpStream.size() > numRtpStreamsBefore)
@@ -648,7 +648,7 @@ namespace RTC
 			isRtx  = true;
 
 			// Process the packet.
-			if (!rtpStream->ReceiveRtxPacket(packet))
+			if (!rtpStream->ReceiveRtxPacket(packet.get()))
 				return result;
 		}
 		// Should not happen.
@@ -679,7 +679,7 @@ namespace RTC
 				this->keyFrameRequestManager->ForceKeyFrameNeeded(packet->GetSsrc());
 
 			// Update current packet.
-			this->currentRtpPacket = packet;
+			this->currentRtpPacket = packet.get();
 
 			NotifyNewRtpStream(rtpStream);
 
@@ -692,14 +692,14 @@ namespace RTC
 			return result;
 
 		// May emit 'trace' event.
-		EmitTraceEventRtpAndKeyFrameTypes(packet, isRtx);
+		EmitTraceEventRtpAndKeyFrameTypes(packet.get(), isRtx);
 
 		// Mangle the packet before providing the listener with it.
-		if (!MangleRtpPacket(packet, rtpStream))
+		if (!MangleRtpPacket(packet.get(), rtpStream))
 			return ReceiveRtpPacketResult::DISCARDED;
 
 		// Post-process the packet.
-		PostProcessRtpPacket(packet);
+		PostProcessRtpPacket(packet.get());
 
 		this->listener->OnProducerRtpPacketReceived(this, packet);
 

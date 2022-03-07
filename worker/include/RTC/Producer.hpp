@@ -36,8 +36,9 @@ namespace RTC
 			virtual void OnProducerRtpStreamScore(
 			  RTC::Producer* producer, RTC::RtpStream* rtpStream, uint8_t score, uint8_t previousScore) = 0;
 			virtual void OnProducerRtcpSenderReport(
-			  RTC::Producer* producer, RTC::RtpStream* rtpStream, bool first)                         = 0;
-			virtual void OnProducerRtpPacketReceived(RTC::Producer* producer, RTC::RtpPacket* packet) = 0;
+			  RTC::Producer* producer, RTC::RtpStream* rtpStream, bool first) = 0;
+			virtual void OnProducerRtpPacketReceived(
+			  RTC::Producer* producer, RTC::RtpPacket::SharedPtr packet)                              = 0;
 			virtual void OnProducerSendRtcpPacket(RTC::Producer* producer, RTC::RTCP::Packet* packet) = 0;
 			virtual void OnProducerNeedWorstRemoteFractionLost(
 			  RTC::Producer* producer, uint32_t mappedSsrc, uint8_t& worstRemoteFractionLost) = 0;
@@ -120,7 +121,7 @@ namespace RTC
 		{
 			return std::addressof(this->rtpStreamScores);
 		}
-		ReceiveRtpPacketResult ReceiveRtpPacket(RTC::RtpPacket* packet);
+		ReceiveRtpPacketResult ReceiveRtpPacket(RTC::RtpPacket::SharedPtr packet);
 		void ReceiveRtcpSenderReport(RTC::RTCP::SenderReport* report);
 		void ReceiveRtcpXrDelaySinceLastRr(RTC::RTCP::DelaySinceLastRr::SsrcInfo* ssrcInfo);
 		RTC::RTCP::CompoundPacket::UniquePtr GetRtcp(uint64_t nowMs);

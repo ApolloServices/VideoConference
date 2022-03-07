@@ -72,7 +72,7 @@ namespace RTC
 
 		void FillJsonStats(json& jsonObject) override;
 		void SetRtx(uint8_t payloadType, uint32_t ssrc) override;
-		bool ReceivePacket(RTC::RtpPacket* packet, RTC::RtpPacket::SharedPtr& clonedPacket);
+		bool ReceivePacket(RTC::RtpPacket::SharedPtr& packet);
 		void ReceiveNack(RTC::RTCP::FeedbackRtpNackPacket* nackPacket);
 		void ReceiveKeyFrameRequest(RTC::RTCP::FeedbackPs::MessageType messageType);
 		void ReceiveRtcpReceiverReport(RTC::RTCP::ReceiverReport* report);
@@ -89,7 +89,7 @@ namespace RTC
 		uint32_t GetLayerBitrate(uint64_t nowMs, uint8_t spatialLayer, uint8_t temporalLayer) override;
 
 	private:
-		void StorePacket(const RTC::RtpPacket* packet, RTC::RtpPacket::SharedPtr& clonedPacket);
+		void StorePacket(const RTC::RtpPacket::SharedPtr& packet);
 		void ClearOldPackets(const RtpPacket* packet);
 		void ClearBuffer();
 		void FillRetransmissionContainer(uint16_t seq, uint16_t bitmask);

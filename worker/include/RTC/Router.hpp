@@ -61,7 +61,7 @@ namespace RTC
 		void OnTransportProducerRtcpSenderReport(
 		  RTC::Transport* transport, RTC::Producer* producer, RTC::RtpStream* rtpStream, bool first) override;
 		void OnTransportProducerRtpPacketReceived(
-		  RTC::Transport* transport, RTC::Producer* producer, RTC::RtpPacket* packet) override;
+		  RTC::Transport* transport, RTC::Producer* producer, RTC::RtpPacket::SharedPtr packet) override;
 		void OnTransportNeedWorstRemoteFractionLost(
 		  RTC::Transport* transport,
 		  RTC::Producer* producer,

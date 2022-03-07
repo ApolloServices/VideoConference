@@ -862,7 +862,7 @@ namespace RTC
 		}
 
 		// Pass the packet to the parent transport.
-		RTC::Transport::ReceiveRtpPacket(packet.get());
+		RTC::Transport::ReceiveRtpPacket(packet);
 	}
 
 	inline void PlainTransport::OnRtcpDataReceived(

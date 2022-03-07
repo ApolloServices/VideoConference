@@ -1674,7 +1674,7 @@ namespace RTC
 #endif
 	}
 
-	void Transport::ReceiveRtpPacket(RTC::RtpPacket* packet)
+	void Transport::ReceiveRtpPacket(RTC::RtpPacket::SharedPtr packet)
 	{
 		MS_TRACE();
 
@@ -1689,10 +1689,10 @@ namespace RTC
 
 		// Feed the TransportCongestionControlServer.
 		if (this->tccServer)
-			this->tccServer->IncomingPacket(nowMs, packet);
+			this->tccServer->IncomingPacket(nowMs, packet.get());
 
 		// Get the associated Producer.
-		RTC::Producer* producer = this->rtpListener.GetProducer(packet);
+		RTC::Producer* producer = this->rtpListener.GetProducer(packet.get());
 
 		if (!producer)
 		{
@@ -1720,10 +1720,10 @@ namespace RTC
 		switch (result)
 		{
 			case RTC::Producer::ReceiveRtpPacketResult::MEDIA:
-				this->recvRtpTransmission.Update(packet);
+				this->recvRtpTransmission.Update(packet.get());
 				break;
 			case RTC::Producer::ReceiveRtpPacketResult::RETRANSMISSION:
-				this->recvRtxTransmission.Update(packet);
+				this->recvRtxTransmission.Update(packet.get());
 				break;
 			case RTC::Producer::ReceiveRtpPacketResult::DISCARDED:
 				// Tell the child class to remove this SSRC.
@@ -2553,7 +2553,8 @@ namespace RTC
 		this->listener->OnTransportProducerRtcpSenderReport(this, producer, rtpStream, first);
 	}
 
-	inline void Transport::OnProducerRtpPacketReceived(RTC::Producer* producer, RTC::RtpPacket* packet)
+	inline void Transport::OnProducerRtpPacketReceived(
+	  RTC::Producer* producer, RTC::RtpPacket::SharedPtr packet)
 	{
 		MS_TRACE();
 

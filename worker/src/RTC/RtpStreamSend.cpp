@@ -224,20 +224,20 @@ namespace RTC
 		this->rtxSeq = Utils::Crypto::GetRandomUInt(0u, 0xFFFF);
 	}
 
-	bool RtpStreamSend::ReceivePacket(RTC::RtpPacket* packet, RTC::RtpPacket::SharedPtr& clonedPacket)
+	bool RtpStreamSend::ReceivePacket(RTC::RtpPacket::SharedPtr& packet)
 	{
 		MS_TRACE();
 
 		// Call the parent method.
-		if (!RtpStream::ReceiveStreamPacket(packet))
+		if (!RtpStream::ReceiveStreamPacket(packet.get()))
 			return false;
 
 		// If buffer is present, store the packet into the buffer.
 		if (this->useNack)
-			StorePacket(packet, clonedPacket);
+			StorePacket(packet);
 
 		// Increase transmission counter.
-		this->transmissionCounter.Update(packet);
+		this->transmissionCounter.Update(packet.get());
 
 		return true;
 	}
@@ -424,7 +424,7 @@ namespace RTC
 		MS_ABORT("invalid method call");
 	}
 
-	void RtpStreamSend::StorePacket(const RTC::RtpPacket* packet, RTC::RtpPacket::SharedPtr& clonedPacket)
+	void RtpStreamSend::StorePacket(const RTC::RtpPacket::SharedPtr& packet)
 	{
 		MS_TRACE();
 
@@ -446,7 +446,7 @@ namespace RTC
 		auto seq          = packet->GetSequenceNumber();
 		auto* storageItem = this->storageItemBuffer.Get(seq);
 
-		this->ClearOldPackets(packet);
+		this->ClearOldPackets(packet.get());
 
 		// The buffer item is already used. Check whether we should replace its
 		// storage with the new packet or just ignore it (if duplicated packet).
@@ -470,17 +470,8 @@ namespace RTC
 			MS_ASSERT(this->storageItemBuffer.Insert(seq, storageItem), "sequence number must be empty");
 		}
 
-		// Only clone once and only if necessary.
-		if (!clonedPacket.get())
-		{
-			auto clone = packet->Clone();
-
-			// Move the RtpPacket pointer into clonedPacket shared pointer.
-			clonedPacket.swap(clone);
-		}
-
 		// Store original packet and some extra info into the retrieved storage item.
-		storageItem->originalPacket = clonedPacket;
+		storageItem->originalPacket = packet;
 		storageItem->ssrc           = packet->GetSsrc();
 		storageItem->sequenceNumber = packet->GetSequenceNumber();
 		storageItem->timestamp      = packet->GetTimestamp();

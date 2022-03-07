@@ -94,7 +94,7 @@ namespace RTC
 			virtual void OnTransportProducerRtcpSenderReport(
 			  RTC::Transport* transport, RTC::Producer* producer, RTC::RtpStream* rtpStream, bool first) = 0;
 			virtual void OnTransportProducerRtpPacketReceived(
-			  RTC::Transport* transport, RTC::Producer* producer, RTC::RtpPacket* packet) = 0;
+			  RTC::Transport* transport, RTC::Producer* producer, RTC::RtpPacket::SharedPtr packet) = 0;
 			virtual void OnTransportNeedWorstRemoteFractionLost(
 			  RTC::Transport* transport,
 			  RTC::Producer* producer,
@@ -159,7 +159,7 @@ namespace RTC
 		{
 			this->sendTransmission.Update(len, DepLibUV::GetTimeMs());
 		}
-		void ReceiveRtpPacket(RTC::RtpPacket* packet);
+		void ReceiveRtpPacket(RTC::RtpPacket::SharedPtr packet);
 		void ReceiveRtcpPacket(RTC::RTCP::Packet* packet);
 		void ReceiveSctpData(const uint8_t* data, size_t len);
 		void SetNewProducerIdFromInternal(json& internal, std::string& producerId) const;
@@ -208,7 +208,7 @@ namespace RTC
 		  RTC::Producer* producer, RTC::RtpStream* rtpStream, uint8_t score, uint8_t previousScore) override;
 		void OnProducerRtcpSenderReport(
 		  RTC::Producer* producer, RTC::RtpStream* rtpStream, bool first) override;
-		void OnProducerRtpPacketReceived(RTC::Producer* producer, RTC::RtpPacket* packet) override;
+		void OnProducerRtpPacketReceived(RTC::Producer* producer, RTC::RtpPacket::SharedPtr packet) override;
 		void OnProducerSendRtcpPacket(RTC::Producer* producer, RTC::RTCP::Packet* packet) override;
 		void OnProducerNeedWorstRemoteFractionLost(
 		  RTC::Producer* producer, uint32_t mappedSsrc, uint8_t& worstRemoteFractionLost) override;
