@@ -133,7 +133,7 @@ namespace RTC
 			// clang-format on
 		}
 
-		static SharedPtr Parse(const uint8_t* data, size_t len);
+		static RtpPacket* Parse(const uint8_t* data, size_t len);
 
 	private:
 		RtpPacket(
@@ -144,9 +144,9 @@ namespace RTC
 		  uint8_t payloadPadding,
 		  size_t size);
 
+	public:
 		~RtpPacket();
 
-	public:
 		void Dump() const;
 
 		void FillJson(json& jsonObject) const;

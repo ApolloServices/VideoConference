@@ -1025,7 +1025,7 @@ namespace RTC
 		this->iceServer->ForceSelectedTuple(tuple);
 
 		// Pass the packet to the parent transport.
-		RTC::Transport::ReceiveRtpPacket(packet.get());
+		RTC::Transport::ReceiveRtpPacket(packet);
 	}
 
 	inline void WebRtcTransport::OnRtcpDataReceived(

@@ -48,8 +48,8 @@ namespace RTC
 		std::memcpy(this->probationPacketBuffer, ProbationPacketHeader, ProbationPacketHeaderSize);
 
 		// Create the probation RTP packet.
-		this->probationPacket =
-		  RTC::RtpPacket::Parse(this->probationPacketBuffer, MaxProbationPacketSize);
+		this->probationPacket.reset(
+		  RTC::RtpPacket::Parse(this->probationPacketBuffer, MaxProbationPacketSize));
 
 		// Sex fixed codec payload type.
 		this->probationPacket->SetPayloadType(RTC::RtpProbationCodecPayloadType);
@@ -128,12 +128,9 @@ namespace RTC
 
 		// Delete the probation packet buffer.
 		delete[] this->probationPacketBuffer;
-
-		// Release the probation RTP packet.
-		this->probationPacket.reset();
 	}
 
-	RTC::RtpPacket::SharedPtr RtpProbationGenerator::GetNextPacket(size_t size)
+	RTC::RtpPacket* RtpProbationGenerator::GetNextPacket(size_t size)
 	{
 		MS_TRACE();
 
@@ -157,6 +154,6 @@ namespace RTC
 		// Set probation packet payload size.
 		this->probationPacket->SetPayloadLength(size - ProbationPacketHeaderSize);
 
-		return this->probationPacket;
+		return this->probationPacket.get();
 	}
 } // namespace RTC

@@ -18,12 +18,12 @@ namespace RTC
 		virtual ~RtpProbationGenerator();
 
 	public:
-		RTC::RtpPacket::SharedPtr GetNextPacket(size_t size);
+		RTC::RtpPacket* GetNextPacket(size_t size);
 
 	private:
 		// Allocated by this.
 		uint8_t* probationPacketBuffer{ nullptr };
-		RTC::RtpPacket::SharedPtr probationPacket{ nullptr };
+		std::unique_ptr<RTC::RtpPacket> probationPacket{ nullptr };
 	}; // namespace RTC
 
 } // namespace RTC

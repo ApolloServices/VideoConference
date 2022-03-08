@@ -15,12 +15,12 @@ namespace RTC
 
 	/* Class methods. */
 
-	RtpPacket::SharedPtr RtpPacket::Parse(const uint8_t* data, size_t len)
+	RtpPacket* RtpPacket::Parse(const uint8_t* data, size_t len)
 	{
 		MS_TRACE();
 
 		if (!RtpPacket::IsRtp(data, len))
-			return SharedPtr(nullptr);
+			return nullptr;
 
 		auto* ptr = const_cast<uint8_t*>(data);
 
@@ -42,7 +42,7 @@ namespace RTC
 			{
 				MS_WARN_TAG(rtp, "not enough space for the announced CSRC list, packet discarded");
 
-				return SharedPtr(nullptr);
+				return nullptr;
 			}
 			ptr += csrcListSize;
 		}
@@ -58,7 +58,7 @@ namespace RTC
 			{
 				MS_WARN_TAG(rtp, "not enough space for the announced header extension, packet discarded");
 
-				return SharedPtr(nullptr);
+				return nullptr;
 			}
 
 			headerExtension = reinterpret_cast<HeaderExtension*>(ptr);
@@ -73,7 +73,7 @@ namespace RTC
 				MS_WARN_TAG(
 				  rtp, "not enough space for the announced header extension value, packet discarded");
 
-				return SharedPtr(nullptr);
+				return nullptr;
 			}
 			ptr += 4 + extensionValueSize;
 		}
@@ -93,7 +93,7 @@ namespace RTC
 			{
 				MS_WARN_TAG(rtp, "padding bit is set but no space for a padding byte, packet discarded");
 
-				return SharedPtr(nullptr);
+				return nullptr;
 			}
 
 			payloadPadding = data[len - 1];
@@ -101,7 +101,7 @@ namespace RTC
 			{
 				MS_WARN_TAG(rtp, "padding byte cannot be 0, packet discarded");
 
-				return SharedPtr(nullptr);
+				return nullptr;
 			}
 
 			if (payloadLength < size_t{ payloadPadding })
@@ -111,7 +111,7 @@ namespace RTC
 				  "number of padding octets is greater than available space for payload, packet "
 				  "discarded");
 
-				return SharedPtr(nullptr);
+				return nullptr;
 			}
 			payloadLength -= size_t{ payloadPadding };
 		}
@@ -121,21 +121,10 @@ namespace RTC
 		           payloadLength + size_t{ payloadPadding },
 		  "packet's computed size does not match received size");
 
-		auto* packet = RtpPacketPool.Allocate();
-		new (packet) RtpPacket(header, headerExtension, payload, payloadLength, payloadPadding, len);
+		auto* packet =
+		  new RtpPacket(header, headerExtension, payload, payloadLength, payloadPadding, len);
 
-		SharedPtr shared(
-		  packet,
-		  /*Deleter*/
-		  [](RtpPacket* packet)
-		  {
-			  // Call destructor manually since memory was pre-allocated upfront.
-			  packet->~RtpPacket();
-			  // Return packet into object pool for future reuse of memory allocation.
-			  RtpPacketPool.Return(packet);
-		  });
-
-		return shared;
+		return packet;
 	}
 
 	/* Instance methods. */
@@ -163,6 +152,7 @@ namespace RTC
 	{
 		MS_TRACE();
 
+		// This is a cloned packet, return the buffer to the pool.
 		if (this->buffer)
 		{
 			this->buffer->~array();

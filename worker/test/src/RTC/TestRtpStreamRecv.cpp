@@ -143,25 +143,25 @@ SCENARIO("receive RTP packets and trigger NACK", "[rtp][rtpstream]")
 		RtpStreamRecv rtpStream(&listener, params);
 
 		packet->SetSequenceNumber(1);
-		rtpStream.ReceivePacket(packet.get());
+		rtpStream.ReceivePacket(packet);
 
 		packet->SetSequenceNumber(3);
 		listener.shouldTriggerNack = true;
 		listener.shouldTriggerPLI  = false;
 		listener.shouldTriggerFIR  = false;
-		rtpStream.ReceivePacket(packet.get());
+		rtpStream.ReceivePacket(packet);
 
 		REQUIRE(listener.nackedSeqNumbers.size() == 1);
 		REQUIRE(listener.nackedSeqNumbers[0] == 2);
 		listener.nackedSeqNumbers.clear();
 
 		packet->SetSequenceNumber(2);
-		rtpStream.ReceivePacket(packet.get());
+		rtpStream.ReceivePacket(packet);
 
 		REQUIRE(listener.nackedSeqNumbers.size() == 0);
 
 		packet->SetSequenceNumber(4);
-		rtpStream.ReceivePacket(packet.get());
+		rtpStream.ReceivePacket(packet);
 
 		REQUIRE(listener.nackedSeqNumbers.size() == 0);
 	}
@@ -172,13 +172,13 @@ SCENARIO("receive RTP packets and trigger NACK", "[rtp][rtpstream]")
 		RtpStreamRecv rtpStream(&listener, params);
 
 		packet->SetSequenceNumber(0xfffe);
-		rtpStream.ReceivePacket(packet.get());
+		rtpStream.ReceivePacket(packet);
 
 		packet->SetSequenceNumber(1);
 		listener.shouldTriggerNack = true;
 		listener.shouldTriggerPLI  = false;
 		listener.shouldTriggerFIR  = false;
-		rtpStream.ReceivePacket(packet.get());
+		rtpStream.ReceivePacket(packet);
 
 		REQUIRE(listener.nackedSeqNumbers.size() == 2);
 		REQUIRE(listener.nackedSeqNumbers[0] == 0xffff);
@@ -192,14 +192,14 @@ SCENARIO("receive RTP packets and trigger NACK", "[rtp][rtpstream]")
 		RtpStreamRecv rtpStream(&listener, params);
 
 		packet->SetSequenceNumber(1);
-		rtpStream.ReceivePacket(packet.get());
+		rtpStream.ReceivePacket(packet);
 
 		// Seq different is bigger than MaxNackPackets in NackGenerator, so it
 		// triggers a key frame.
 		packet->SetSequenceNumber(1003);
 		listener.shouldTriggerPLI = true;
 		listener.shouldTriggerFIR = false;
-		rtpStream.ReceivePacket(packet.get());
+		rtpStream.ReceivePacket(packet);
 	}
 
 	// Must run the loop to wait for UV timers and close them.

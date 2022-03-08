@@ -95,7 +95,7 @@ SCENARIO("NACK and RTP packets retransmission", "[rtp][rtcp][nack]")
 		// Receive all the packets (some of them not in order and/or duplicated).
 		{
 			RtpPacket::SharedPtr clonedPacket{ nullptr };
-			stream->ReceivePacket(packet1.get(), clonedPacket);
+			stream->ReceivePacket(packet1, clonedPacket);
 		}
 		{
 			RtpPacket::SharedPtr clonedPacket{ nullptr };
@@ -204,7 +204,7 @@ SCENARIO("NACK and RTP packets retransmission", "[rtp][rtcp][nack]")
 		clonedPacket->SetSequenceNumber(5555);
 		clonedPacket->SetTimestamp(6666);
 
-		stream->ReceivePacket(packet.get(), clonedPacket);
+		stream->ReceivePacket(packet, clonedPacket);
 
 		// Create a NACK item that requests the packet.
 		RTCP::FeedbackRtpNackPacket nackPacket(0, params.ssrc);

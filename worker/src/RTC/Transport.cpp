@@ -1705,6 +1705,8 @@ namespace RTC
 			// Tell the child class to remove this SSRC.
 			RecvStreamClosed(packet->GetSsrc());
 
+			delete packet;
+
 			return;
 		}
 
@@ -1731,6 +1733,8 @@ namespace RTC
 				break;
 			default:;
 		}
+
+		delete packet;
 	}
 
 	void Transport::ReceiveRtcpPacket(RTC::RTCP::Packet* packet)

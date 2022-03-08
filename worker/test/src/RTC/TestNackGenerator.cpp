@@ -131,7 +131,7 @@ void validate(std::vector<TestNackGeneratorInput>& inputs)
 
 		packet->SetPayloadDescriptorHandler(tpdh);
 		packet->SetSequenceNumber(input.seq);
-		nackGenerator.ReceivePacket(packet.get(), /*isRecovered*/ false);
+		nackGenerator.ReceivePacket(packet, /*isRecovered*/ false);
 
 		listener.Check(nackGenerator);
 	}
