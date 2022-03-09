@@ -13,6 +13,16 @@ namespace RTC
 
 	class RtpProbationGenerator
 	{
+		// Custom deleter for RtpPacket unique_ptr.
+		struct Deleter
+		{
+			// Called by unique_ptr to destroy/free the Packet.
+			void operator()(RTC::RtpPacket* packet)
+			{
+				packet->ReturnToPool();
+			}
+		};
+
 	public:
 		explicit RtpProbationGenerator();
 		virtual ~RtpProbationGenerator();
@@ -23,7 +33,7 @@ namespace RTC
 	private:
 		// Allocated by this.
 		uint8_t* probationPacketBuffer{ nullptr };
-		std::unique_ptr<RTC::RtpPacket> probationPacket{ nullptr };
+		std::unique_ptr<RTC::RtpPacket, Deleter> probationPacket{ nullptr };
 	}; // namespace RTC
 
 } // namespace RTC

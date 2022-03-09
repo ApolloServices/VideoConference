@@ -144,8 +144,14 @@ namespace RTC
 		  uint8_t payloadPadding,
 		  size_t size);
 
-	public:
 		~RtpPacket();
+
+	public:
+		// RtpPackets created with Parse() need to manually call this method
+		// in order to return the instance memory to the pool.
+		// RtpPackets created with Clone() don't, since the shared_ptr allocator
+		// will automatically do it.
+		void ReturnToPool();
 
 		void Dump() const;
 

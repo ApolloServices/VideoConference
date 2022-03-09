@@ -121,9 +121,8 @@ namespace RTC
 		           payloadLength + size_t{ payloadPadding },
 		  "packet's computed size does not match received size");
 
-		auto* packet =
-		  new RtpPacket(header, headerExtension, payload, payloadLength, payloadPadding, len);
-
+		auto* packet = RtpPacketPool.Allocate();
+		new (packet) RtpPacket(header, headerExtension, payload, payloadLength, payloadPadding, len);
 		return packet;
 	}
 
@@ -159,6 +158,14 @@ namespace RTC
 			RtpPacketBufferPool.Return(this->buffer);
 			this->buffer = nullptr;
 		}
+	}
+
+	void RtpPacket::ReturnToPool()
+	{
+		// Call destructor manually since memory was pre-allocated upfront.
+		this->~RtpPacket();
+		// Return packet into object pool for future reuse of memory allocation.
+		RtpPacketPool.Return(this);
 	}
 
 	void RtpPacket::Dump() const
@@ -711,13 +718,7 @@ namespace RTC
 		SharedPtr shared(
 		  packet,
 		  /*Deleter*/
-		  [](RtpPacket* packet)
-		  {
-			  // Call destructor manually since memory was pre-allocated upfront.
-			  packet->~RtpPacket();
-			  // Return packet into object pool for future reuse of memory allocation.
-			  RtpPacketPool.Return(packet);
-		  });
+		  [](RtpPacket* packet) { packet->ReturnToPool(); });
 
 		// Keep already set extension ids.
 		packet->midExtensionId               = this->midExtensionId;
